@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produk Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+color:#d580ff;
+}
+
+#bgVideo{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+height:100%;
+min-width:calc(100vh * 9 / 16);
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.7);
+z-index:-1;
+}
+
+.header{
+position:fixed;
+top:0;
+left:0;
+right:0;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 20px;
+background:rgba(0,0,0,.6);
+border-bottom:1px solid #7a00ff;
+z-index:1000;
+}
+
+.left{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.logo{
+width:40px;
+height:40px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.home{
+border:1px solid #7a00ff;
+padding:6px 14px;
+border-radius:10px;
+text-decoration:none;
+}
+
+.wrapper{
+padding:80px 20px;
+}
+
+.banner{
+height:140px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 0 20px #7a00ff;
+overflow:hidden;
+}
+
+.banner video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.pagination{
+display:flex;
+gap:8px;
+overflow:auto;
+margin-bottom:15px;
+}
+
+.pagination button{
+min-width:35px;
+height:35px;
+background:#2a0050;
+border:none;
+border-radius:8px;
+box-shadow:0 0 8px #7a00ff;
+}
+
+.card{
+display:flex;
+gap:15px;
+background:#140028;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 0 15px #6a00ff;
+position:relative;
+}
+
+.sold{
+position:absolute;
+top:10px;
+right:10px;
+background:red;
+padding:3px 8px;
+border-radius:6px;
+font-size:11px;
+}
+
+.img{
+width:110px;
+height:110px;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 0 10px #7a00ff;
+}
+
+.img img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.info{
+flex:1;
+font-size:13px;
+line-height:1.6;
+}
+
+.checkout{
+margin-top:8px;
+width:100%;
+padding:8px;
+border:none;
+border-radius:8px;
+background:linear-gradient(45deg,#ff00cc,#7a00ff);
+box-shadow:0 0 10px #7a00ff;
+}
+
+.checkout:disabled{
+background:#333;
+box-shadow:none;
+}
+
+.music{
+position:fixed;
+bottom:20px;
+right:20px;
+background:rgba(20,0,40,.8);
+border:1px solid #7a00ff;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+  
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="b4.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<div class="left">
+<img class="logo" src="logo.png">
+<div>Stock Nero Store</div>
+</div>
+
+<a href="home.html" class="home">HOME</a>
+</div>
+
+<div class="wrapper">
+
+<div class="banner">
+<video autoplay muted loop playsinline>
+<source src="suki3.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="pagination" id="pages"></div>
+<div id="produk"></div>
+
+</div>
+
+<div class="music" onclick="toggleMusic()">MUSIC</div>
+
+<audio id="bgm" loop>
+<source src="angelbaby.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const music = document.getElementById("bgm");
+
+window.addEventListener("load",()=>{
+let playing = localStorage.getItem("musicPlaying");
+let time = localStorage.getItem("musicTime");
+
+if(time) music.currentTime = parseFloat(time);
+if(playing === "true") music.play().catch(()=>{});
+});
+
+setInterval(()=>{
+localStorage.setItem("musicTime", music.currentTime);
+},1000);
+
+function toggleMusic(){
+if(music.paused){
+music.play();
+localStorage.setItem("musicPlaying","true");
+}else{
+music.pause();
+localStorage.setItem("musicPlaying","false");
+}
+}
+
+const nomorWA="628xxxxxxxxxx";
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCJomifys1cY-9ELI4Ft3Z5N-cLs2YQcVU",
+authDomain: "nero-fa67c.firebaseapp.com",
+projectId: "nero-fa67c",
+storageBucket: "nero-fa67c.firebasestorage.app",
+messagingSenderId: "349005489687",
+appId: "1:349005489687:web:c27ce076b4f54da5275e52",
+measurementId: "G-QWSLFFHVS7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let produk = [];
+
+onSnapshot(collection(db,"produk"),(snap)=>{
+produk=[];
+snap.forEach(doc=>{
+produk.push(doc.data());
+});
+render(1);
+});
+
+function render(page){
+
+let start=(page-1)*10;
+let end=start+10;
+
+let html="";
+
+for(let i=start;i<end;i++){
+
+let p=produk[i];
+if(!p) continue;
+
+html+=`
+<div class="card">
+
+${!p.stok ? '<div class="sold">SOLD OUT</div>' : ''}
+
+<div class="img">
+<img src="${p.foto}">
+</div>
+
+<div class="info">
+Produk #${i+1}<br>
+Harga : ${p.harga}<br>
+Log : ${p.log}<br>
+Spek : ${p.spek}
+
+<button class="checkout"
+${!p.stok ? 'disabled' : ''}
+onclick="checkout(${i})">
+${p.stok ? 'Checkout' : 'Stok Habis'}
+</button>
+
+</div>
+
+</div>
+`;
+}
+
+document.getElementById("produk").innerHTML=html;
+}
+
+let btn="";
+for(let i=1;i<=25;i++){
+btn+=`<button onclick="render(${i})">${i}</button>`;
+}
+document.getElementById("pages").innerHTML=btn;
+
+window.checkout=function(id){
+
+let p=produk[id];
+
+let text=
+`Halo saya ingin order
+
+Harga : ${p.harga}
+Log : ${p.log}
+Spek : ${p.spek}`;
+
+window.open(
+"https://wa.me/"+nomorWA+
+"?text="+encodeURIComponent(text)
+);
+
+}
+</script>
+
+</body>
+</html>

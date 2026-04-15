@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:#d580ff;
+}
+
+#bgVideo{
+position:fixed;
+top:50%;
+left:50%;
+height:100vh;
+width:calc(100vh * 9 / 16);
+transform:translate(-50%,-50%);
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+z-index:-1;
+}
+
+.login{
+width:330px;
+background:rgba(20,0,40,.6);
+border:1px solid #7a00ff;
+padding:25px;
+border-radius:20px;
+box-shadow:0 0 25px #7a00ff;
+backdrop-filter:blur(10px);
+}
+
+.title{
+text-align:center;
+margin-bottom:15px;
+font-size:18px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+background:black;
+border:1px solid #7a00ff;
+color:#d580ff;
+border-radius:10px;
+}
+
+button{
+width:100%;
+margin-top:15px;
+padding:12px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#ff00cc,#7a00ff);
+color:white;
+cursor:pointer;
+box-shadow:0 0 15px #7a00ff;
+}
+
+.error{
+text-align:center;
+color:red;
+font-size:12px;
+margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="b6.mp4" type="video/mp4">
+</video>
+
+<div class="login">
+
+<div class="title">LOGIN PANEL</div>
+
+<input id="user" placeholder="Username">
+<input type="password" id="pass" placeholder="Password">
+<input id="kode" placeholder="Kode">
+
+<button onclick="login()">LOGIN</button>
+
+<div class="error" id="err"></div>
+
+</div>
+
+<script>
+
+/* OWNER */
+const OWNER = {
+username:"Kenzytzy152000",
+password:"BaNGsatLoe099",
+kode:"152000"
+}
+
+/* ADMIN */
+const ADMIN = {
+username:"Rrnzytzy153000",
+password:"BaNGsatLoe199",
+kode:"153000"
+}
+
+/* limit config */
+const MAX_ATTEMPT = 5;
+const BLOCK_TIME = 60000; // 1 menit
+
+function login(){
+
+let blockedUntil = localStorage.getItem("blockedUntil");
+
+if(blockedUntil && Date.now() < blockedUntil){
+let s = Math.ceil((blockedUntil - Date.now())/1000);
+err.innerText = "Login diblok "+s+" detik";
+return;
+}
+
+let u = user.value;
+let p = pass.value;
+let k = kode.value;
+
+/* owner */
+if(u===OWNER.username && p===OWNER.password && k===OWNER.kode){
+success("owner");
+return;
+}
+
+/* admin */
+if(u===ADMIN.username && p===ADMIN.password && k===ADMIN.kode){
+success("admin");
+return;
+}
+
+/* gagal */
+let attempt = localStorage.getItem("attempt") || 0;
+attempt++;
+
+localStorage.setItem("attempt",attempt);
+
+if(attempt >= MAX_ATTEMPT){
+
+localStorage.setItem(
+"blockedUntil",
+Date.now()+BLOCK_TIME
+);
+
+err.innerText="Terlalu banyak percobaan. Diblok 1 menit";
+return;
+
+}
+
+err.innerText="Login salah ("+attempt+"/5)";
+}
+
+function success(role){
+localStorage.removeItem("attempt");
+localStorage.removeItem("blockedUntil");
+
+localStorage.setItem("adminLogin","true");
+localStorage.setItem("role",role);
+
+location.href="admin.html";
+}
+
+/* auto login */
+if(localStorage.getItem("adminLogin")==="true"){
+location.href="admin.html";
+}
+
+</script>
+
+</body>
+</html>

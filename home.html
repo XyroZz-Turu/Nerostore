@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+html,body{
+height:100%;
+overflow:hidden;
+position:fixed;
+width:100%;
+}
+
+body{
+color:white;
+display:flex;
+flex-direction:column;
+}
+
+/* TRANSITION */
+#transitionScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+z-index:9999;
+display:flex;
+justify-content:center;
+align-items:center;
+color:#d580ff;
+opacity:0;
+pointer-events:none;
+transition:0.5s;
+}
+
+#transitionScreen.show{
+opacity:1;
+pointer-events:auto;
+}
+
+.loader{
+font-size:14px;
+animation:blink 1s infinite;
+}
+
+@keyframes blink{
+50%{opacity:0.3;}
+}
+
+/* BG VIDEO */
+#bgVideo{
+position:fixed;
+top:50%;
+left:50%;
+height:100vh;
+width:calc(100vh * 9 / 16);
+transform:translate(-50%,-50%);
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.65);
+z-index:-1;
+}
+
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+gap:10px;
+padding:15px;
+border-bottom:1px solid #8a2eff;
+background:rgba(0,0,0,.4);
+backdrop-filter:blur(10px);
+}
+
+.logo{
+width:40px;
+height:40px;
+border-radius:10px;
+object-fit:cover;
+cursor:pointer;
+}
+
+.title{
+color:#d580ff;
+}
+
+/* WRAPPER */
+.wrapper{
+padding:20px;
+}
+
+/* BANNER */
+.banner{
+width:100%;
+height:150px;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 0 20px #8a2eff;
+}
+
+.banner video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* MENU */
+.menu{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+margin-top:15px;
+}
+
+.card{
+background:rgba(40,0,70,.5);
+border:1px solid #7a00ff;
+padding:35px 10px;
+border-radius:15px;
+text-align:center;
+box-shadow:0 0 10px #6a00ff;
+cursor:pointer;
+}
+
+/* WA */
+.wa{
+position:fixed;
+bottom:90px;
+right:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+background:#25D366;
+display:flex;
+justify-content:center;
+align-items:center;
+box-shadow:0 0 20px #25D366;
+}
+
+.wa img{
+width:30px;
+}
+
+/* MUSIC */
+.music{
+position:fixed;
+bottom:20px;
+right:20px;
+background:rgba(20,0,40,.8);
+border:1px solid #7a00ff;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+z-index:999;
+}
+</style>
+</head>
+
+<body>
+
+<div id="transitionScreen">
+<div class="loader">LOADING...</div>
+</div>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="bv1.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<img src="logo.png" class="logo" onclick="openAdmin()">
+<div class="title">Nero Store</div>
+</div>
+
+<div class="wrapper">
+
+<div class="banner">
+<video autoplay muted loop playsinline>
+<source src="suki2.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="menu">
+
+<div class="card" onclick="goPage('testimoni.html')">
+Testimony
+</div>
+
+<div class="card" onclick="goPage('produk.html')">
+Stock Akun
+</div>
+
+<div class="card" onclick="goPage('allsosmed.html')">
+Sosmed
+</div>
+
+<div class="card" onclick="goPage('tentang.html')">
+About Me
+</div>
+
+</div>
+</div>
+
+<a href="https://whatsapp.com/channel/0029VbC6kDtB4hdN3x5pRP2J">
+<div class="wa">
+<img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
+</div>
+</a>
+
+<div class="music" onclick="toggleMusic()">MUSIC</div>
+
+<audio id="bgm" loop>
+<source src="angelbaby.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const music = document.getElementById("bgm");
+
+window.addEventListener("load",()=>{
+
+let playing = localStorage.getItem("musicPlaying");
+let time = localStorage.getItem("musicTime");
+
+if(time){
+music.currentTime = parseFloat(time);
+}
+
+if(playing === "true"){
+music.play().catch(()=>{});
+}
+
+});
+
+setInterval(()=>{
+localStorage.setItem("musicTime", music.currentTime);
+},1000);
+
+function toggleMusic(){
+if(music.paused){
+music.play();
+localStorage.setItem("musicPlaying","true");
+}else{
+music.pause();
+localStorage.setItem("musicPlaying","false");
+}
+}
+
+const screen = document.getElementById("transitionScreen");
+
+function goPage(url){
+screen.classList.add("show");
+
+setTimeout(()=>{
+window.location.href = url;
+},1800);
+}
+
+/* SECRET ADMIN LOGIN */
+let click=0;
+
+function openAdmin(){
+click++;
+
+if(click>=5){
+window.location.href="login.html";
+}
+
+setTimeout(()=>{
+click=0;
+},2000);
+}
+</script>
+
+</body>
+</html>

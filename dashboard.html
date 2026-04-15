@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+color:#d580ff;
+padding:20px;
+}
+
+/* bg video */
+#bgVideo{
+position:fixed;
+top:50%;
+left:50%;
+height:100vh;
+width:calc(100vh * 9 / 16);
+transform:translate(-50%,-50%);
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+z-index:-1;
+}
+
+/* header */
+.header{
+display:flex;
+justify-content:space-between;
+margin-bottom:20px;
+}
+
+.btn{
+padding:8px 14px;
+border:1px solid #7a00ff;
+border-radius:10px;
+cursor:pointer;
+background:rgba(120,0,255,.2);
+}
+
+/* card */
+.card{
+background:rgba(20,0,40,.6);
+border:1px solid #7a00ff;
+border-radius:20px;
+padding:15px;
+margin-bottom:15px;
+backdrop-filter:blur(10px);
+}
+
+/* stats */
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.stat{
+background:rgba(40,0,70,.6);
+padding:15px;
+border-radius:15px;
+text-align:center;
+}
+
+/* form */
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+background:black;
+border:1px solid #7a00ff;
+color:#d580ff;
+border-radius:10px;
+}
+
+button{
+width:100%;
+margin-top:10px;
+padding:12px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#ff00cc,#7a00ff);
+color:white;
+cursor:pointer;
+}
+
+.list{
+margin-top:10px;
+font-size:12px;
+}
+
+.item{
+display:flex;
+justify-content:space-between;
+padding:6px;
+border-bottom:1px solid #222;
+}
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="b2.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<div>DASHBOARD UANG</div>
+<div class="btn" onclick="back()">Admin</div>
+</div>
+
+<div class="stats">
+<div class="stat">
+Masuk
+<div id="masuk">Rp0</div>
+</div>
+
+<div class="stat">
+Keluar
+<div id="keluar">Rp0</div>
+</div>
+
+<div class="stat">
+Saldo
+<div id="saldo">Rp0</div>
+</div>
+</div>
+
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+Tambah Uang
+
+<input id="nama" placeholder="Keterangan">
+<input id="jumlah" placeholder="Jumlah">
+<input id="tipe" placeholder="masuk / keluar">
+
+<button onclick="tambah()">Tambah</button>
+
+<div id="list" class="list"></div>
+</div>
+
+<script>
+
+if(localStorage.getItem("adminLogin")!=="true"){
+location.href="login.html";
+}
+
+function back(){
+location.href="admin.html";
+}
+
+let data = JSON.parse(localStorage.getItem("uang") || "[]");
+
+const ctx = document.getElementById('chart');
+
+const chart = new Chart(ctx, {
+type: 'line',
+data: {
+labels: [],
+datasets: [
+{
+label: 'Uang Masuk',
+data: [],
+borderWidth:2
+},
+{
+label: 'Uang Keluar',
+data: [],
+borderWidth:2
+}
+]
+}
+});
+
+function render(){
+
+let masukTotal=0;
+let keluarTotal=0;
+
+let labels=[];
+let masuk=[];
+let keluar=[];
+
+let html="";
+
+data.forEach((d,i)=>{
+
+labels.push(d.nama);
+
+if(d.tipe=="masuk"){
+masuk.push(d.jumlah);
+keluar.push(0);
+masukTotal+=Number(d.jumlah);
+}else{
+masuk.push(0);
+keluar.push(d.jumlah);
+keluarTotal+=Number(d.jumlah);
+}
+
+html+=`
+<div class="item">
+${d.nama} - ${d.jumlah}
+<span onclick="hapus(${i})">hapus</span>
+</div>
+`;
+
+});
+
+chart.data.labels = labels;
+chart.data.datasets[0].data = masuk;
+chart.data.datasets[1].data = keluar;
+chart.update();
+
+document.getElementById("list").innerHTML=html;
+
+document.getElementById("masuk").innerText="Rp"+masukTotal;
+document.getElementById("keluar").innerText="Rp"+keluarTotal;
+document.getElementById("saldo").innerText="Rp"+(masukTotal-keluarTotal);
+
+localStorage.setItem("uang",JSON.stringify(data));
+}
+
+function tambah(){
+
+data.push({
+nama:nama.value,
+jumlah:Number(jumlah.value),
+tipe:tipe.value
+});
+
+render();
+
+nama.value="";
+jumlah.value="";
+tipe.value="";
+}
+
+function hapus(i){
+data.splice(i,1);
+render();
+}
+
+render();
+
+</script>
+
+</body>
+</html>
