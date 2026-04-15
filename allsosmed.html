@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sosmed Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+color:#d580ff;
+overflow:hidden;
+}
+
+/* bg video */
+#bgVideo{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.7);
+z-index:-1;
+}
+
+/* header */
+.header{
+position:fixed;
+top:0;
+left:0;
+right:0;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+border-bottom:1px solid #8a2eff;
+background:rgba(0,0,0,.4);
+backdrop-filter:blur(10px);
+z-index:1000;
+}
+
+.left{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.logo{
+width:40px;
+height:40px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.home{
+text-decoration:none;
+color:white;
+border:1px solid #7a00ff;
+padding:6px 12px;
+border-radius:8px;
+}
+
+/* wrapper */
+.wrapper{
+position:fixed;
+top:70px;
+bottom:0;
+left:0;
+right:0;
+overflow:auto;
+padding:20px;
+}
+
+/* banner video */
+.banner{
+height:150px;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 0 20px #8a2eff;
+margin-bottom:15px;
+}
+
+.banner video{
+width:100%;
+height:100%;
+object-fit:cover;
+pointer-events:none;
+}
+
+/* sosmed */
+.card{
+display:flex;
+align-items:center;
+gap:15px;
+background:rgba(40,0,70,.5);
+border:1px solid #7a00ff;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 0 10px #6a00ff;
+}
+
+.icon{
+width:40px;
+height:40px;
+}
+
+/* MUSIC */
+.music{
+position:fixed;
+bottom:20px;
+right:20px;
+background:rgba(20,0,40,.8);
+border:1px solid #7a00ff;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="bv2.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<div class="left">
+<img class="logo" src="logo.png">
+<div>Sosmed Admin/Own Nero</div>
+</div>
+
+<a href="home.html" class="home">HOME</a>
+</div>
+
+<div class="wrapper" id="wrapper">
+
+<div class="banner">
+<video autoplay muted loop playsinline preload="none">
+<source src="suki4.mp4" type="video/mp4">
+</video>
+</div>
+
+</div>
+
+<!-- MUSIC -->
+<div class="music" onclick="toggleMusic()">MUSIC</div>
+
+<audio id="bgm" loop>
+<source src="angelbaby.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const music = document.getElementById("bgm");
+
+// restore music
+window.addEventListener("load",()=>{
+
+let playing = localStorage.getItem("musicPlaying");
+let time = localStorage.getItem("musicTime");
+
+if(time){
+music.currentTime = parseFloat(time);
+}
+
+if(playing === "true"){
+music.play().catch(()=>{});
+}
+
+});
+
+// save posisi
+setInterval(()=>{
+localStorage.setItem("musicTime", music.currentTime);
+},1000);
+
+function toggleMusic(){
+if(music.paused){
+music.play();
+localStorage.setItem("musicPlaying","true");
+}else{
+music.pause();
+localStorage.setItem("musicPlaying","false");
+}
+}
+</script>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCJomifys1cY-9ELI4Ft3Z5N-cLs2YQcVU",
+authDomain: "nero-fa67c.firebaseapp.com",
+projectId: "nero-fa67c",
+storageBucket: "nero-fa67c.firebasestorage.app",
+messagingSenderId: "349005489687",
+appId: "1:349005489687:web:c27ce076b4f54da5275e52",
+measurementId: "G-QWSLFFHVS7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const wrapper = document.getElementById("wrapper");
+
+onSnapshot(collection(db,"sosmed"),(snap)=>{
+
+let html = `
+<div class="banner">
+<video autoplay muted loop playsinline preload="none">
+<source src="suki4.mp4" type="video/mp4">
+</video>
+</div>
+`;
+
+snap.forEach(doc=>{
+let d = doc.data();
+
+html += `
+<div class="card">
+<img class="icon" src="${d.icon}">
+<div>${d.nama}</div>
+</div>
+`;
+});
+
+wrapper.innerHTML = html;
+
+});
+
+// fungsi admin
+window.tambahSosmed = async function(nama,icon){
+await addDoc(collection(db,"sosmed"),{
+nama:nama,
+icon:icon
+});
+}
+
+</script>
+
+</body>
+</html>

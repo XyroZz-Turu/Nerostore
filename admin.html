@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+color:#d580ff;
+padding:20px;
+}
+
+/* VIDEO BG */
+#bgVideo{
+position:fixed;
+top:50%;
+left:50%;
+height:100vh;
+width:calc(100vh * 9 / 16);
+transform:translate(-50%,-50%);
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+z-index:-1;
+}
+
+/* header */
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.title{
+font-size:20px;
+}
+
+.topbtn{
+display:flex;
+gap:10px;
+}
+
+.btn{
+padding:8px 14px;
+border-radius:10px;
+background:rgba(120,0,255,.2);
+border:1px solid #7a00ff;
+cursor:pointer;
+}
+
+/* grid */
+.grid{
+display:grid;
+grid-template-columns:1fr;
+gap:20px;
+}
+
+/* card */
+.card{
+background:rgba(20,0,40,.6);
+border:1px solid #7a00ff;
+border-radius:20px;
+padding:15px;
+box-shadow:0 0 20px rgba(120,0,255,.3);
+backdrop-filter:blur(10px);
+}
+
+.card-title{
+margin-bottom:10px;
+}
+
+/* input */
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+background:black;
+border:1px solid #7a00ff;
+color:#d580ff;
+border-radius:10px;
+}
+
+/* upload */
+.upload{
+margin-top:8px;
+padding:15px;
+border:1px dashed #7a00ff;
+border-radius:10px;
+text-align:center;
+}
+
+/* button */
+button{
+margin-top:10px;
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,#ff00cc,#7a00ff);
+color:white;
+cursor:pointer;
+box-shadow:0 0 15px #7a00ff;
+}
+
+/* list */
+.list{
+margin-top:10px;
+}
+
+.item{
+display:flex;
+justify-content:space-between;
+padding:6px;
+border-bottom:1px solid #222;
+font-size:12px;
+}
+
+.delete{
+color:red;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="b3.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<div class="title">Admin Dashboard</div>
+
+<div class="topbtn">
+<div class="btn" onclick="goDash()">Dashboard</div>
+<div class="btn" onclick="logout()">Logout</div>
+</div>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<div class="card-title">Tambah Produk</div>
+
+<input id="pNo" placeholder="Nomor Produk">
+<input id="pFoto" placeholder="Link gambar">
+
+<div class="upload">
+Upload dari galeri
+<input type="file" id="pFile">
+</div>
+
+<input id="pHarga" placeholder="Harga">
+<input id="pLog" placeholder="Log">
+<input id="pSpek" placeholder="Spek">
+<input id="pStok" placeholder="true / false">
+
+<button onclick="addProduk()">Tambah Produk</button>
+<div id="listProduk" class="list"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Tambah Sosmed</div>
+
+<input id="sNama" placeholder="Nama">
+<input id="sIcon" placeholder="Link icon">
+
+<div class="upload">
+Upload icon
+<input type="file" id="sFile">
+</div>
+
+<input id="sLink" placeholder="Link tujuan">
+
+<button onclick="addSosmed()">Tambah Sosmed</button>
+<div id="listSosmed" class="list"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Tambah Testimoni</div>
+
+<input id="tKode" placeholder="Kode Testimoni">
+<input id="tImg" placeholder="Link gambar">
+
+<div class="upload">
+Upload gambar
+<input type="file" id="tFile">
+</div>
+
+<button onclick="addTesti()">Tambah Testimoni</button>
+<div id="listTesti" class="list"></div>
+</div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import {
+getFirestore,
+collection,
+addDoc,
+onSnapshot,
+deleteDoc,
+doc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCJomifys1cY-9ELI4Ft3Z5N-cLs2YQcVU",
+authDomain: "nero-fa67c.firebaseapp.com",
+projectId: "nero-fa67c",
+storageBucket: "nero-fa67c.firebasestorage.app",
+messagingSenderId: "349005489687",
+appId: "1:349005489687:web:c27ce076b4f54da5275e52"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+if(localStorage.getItem("adminLogin")!=="true"){
+location.href="login.html";
+}
+
+window.logout=()=>{
+localStorage.removeItem("adminLogin");
+location.href="login.html";
+}
+
+window.goDash=()=>{
+location.href="dashboard.html";
+}
+
+window.addProduk=async()=>{
+let foto=pFoto.value;
+if(pFile.files[0]) foto=URL.createObjectURL(pFile.files[0]);
+
+await addDoc(collection(db,"produk"),{
+no:pNo.value,
+foto,
+harga:pHarga.value,
+log:pLog.value,
+spek:pSpek.value,
+stok:pStok.value==="true"
+});
+}
+
+window.addSosmed=async()=>{
+let icon=sIcon.value;
+if(sFile.files[0]) icon=URL.createObjectURL(sFile.files[0]);
+
+await addDoc(collection(db,"sosmed"),{
+nama:sNama.value,
+icon,
+link:sLink.value
+});
+}
+
+window.addTesti=async()=>{
+let gambar=tImg.value;
+if(tFile.files[0]) gambar=URL.createObjectURL(tFile.files[0]);
+
+await addDoc(collection(db,"testimoni"),{
+kode:tKode.value,
+gambar
+});
+}
+
+onSnapshot(collection(db,"produk"),snap=>{
+let html="";
+snap.forEach(d=>{
+let x=d.data();
+html+=`<div class="item">${x.no} ${x.harga}
+<span class="delete" onclick="hapus('produk','${d.id}')">hapus</span>
+</div>`;
+});
+listProduk.innerHTML=html;
+});
+
+onSnapshot(collection(db,"sosmed"),snap=>{
+let html="";
+snap.forEach(d=>{
+let x=d.data();
+html+=`<div class="item">${x.nama}
+<span class="delete" onclick="hapus('sosmed','${d.id}')">hapus</span>
+</div>`;
+});
+listSosmed.innerHTML=html;
+});
+
+onSnapshot(collection(db,"testimoni"),snap=>{
+let html="";
+snap.forEach(d=>{
+let x=d.data();
+html+=`<div class="item">${x.kode}
+<span class="delete" onclick="hapus('testimoni','${d.id}')">hapus</span>
+</div>`;
+});
+listTesti.innerHTML=html;
+});
+
+window.hapus=async(col,id)=>{
+await deleteDoc(doc(db,col,id));
+}
+</script>
+
+</body>
+</html>
