@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testimoni Nero Store</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+color:#d580ff;
+overflow-x:hidden;
+}
+
+/* BG VIDEO */
+#bgVideo{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+z-index:-1;
+}
+
+/* HEADER */
+.header{
+position:fixed;
+top:0;
+left:0;
+right:0;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+background:rgba(0,0,0,.5);
+backdrop-filter:blur(10px);
+border-bottom:1px solid #8a2eff;
+z-index:1000;
+}
+
+.left{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logo{
+width:40px;
+height:40px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.title{
+color:#d580ff;
+font-size:20px;
+}
+
+.home{
+text-decoration:none;
+color:white;
+border:1px solid #8a2eff;
+padding:6px 15px;
+border-radius:10px;
+box-shadow:0 0 10px #8a2eff;
+}
+
+.wrapper{
+padding:90px 20px 30px 20px;
+}
+
+.banner{
+height:150px;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 0 20px #8a2eff;
+margin-bottom:20px;
+}
+
+.banner video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.gallery{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.card{
+background:rgba(60,0,90,.45);
+border:1px solid #7a00ff;
+border-radius:20px;
+box-shadow:0 0 15px #7a00ff;
+overflow:hidden;
+opacity:0;
+animation:fadeUp .8s forwards;
+}
+
+.card img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translateY(30px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.music{
+position:fixed;
+bottom:20px;
+right:20px;
+background:rgba(20,0,40,.8);
+border:1px solid #7a00ff;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+<source src="bv3.mp4" type="video/mp4">
+</video>
+
+<div class="header">
+<div class="left">
+<img class="logo" src="logo.png">
+<div class="title">Testi Nero</div>
+</div>
+
+<a href="home.html" class="home">HOME</a>
+</div>
+
+<div class="wrapper">
+
+<div class="banner">
+<video autoplay muted loop playsinline>
+<source src="suki.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+</div>
+
+<div class="music" onclick="toggleMusic()">MUSIC</div>
+
+<audio id="bgm" loop>
+<source src="angelbaby.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const music = document.getElementById("bgm");
+
+window.addEventListener("load",()=>{
+
+let playing = localStorage.getItem("musicPlaying");
+let time = localStorage.getItem("musicTime");
+
+if(time){
+music.currentTime = parseFloat(time);
+}
+
+if(playing === "true"){
+music.play().catch(()=>{});
+}
+
+});
+
+setInterval(()=>{
+localStorage.setItem("musicTime", music.currentTime);
+},1000);
+
+function toggleMusic(){
+if(music.paused){
+music.play();
+localStorage.setItem("musicPlaying","true");
+}else{
+music.pause();
+localStorage.setItem("musicPlaying","false");
+}
+}
+</script>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCJomifys1cY-9ELI4Ft3Z5N-cLs2YQcVU",
+authDomain: "nero-fa67c.firebaseapp.com",
+projectId: "nero-fa67c",
+storageBucket: "nero-fa67c.firebasestorage.app",
+messagingSenderId: "349005489687",
+appId: "1:349005489687:web:c27ce076b4f54da5275e52",
+measurementId: "G-QWSLFFHVS7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const gallery = document.getElementById("gallery");
+
+onSnapshot(collection(db,"testimoni"),(snap)=>{
+
+let html = "";
+
+snap.forEach(doc=>{
+let d = doc.data();
+
+html += `
+<div class="card">
+<img src="${d.gambar}">
+</div>
+`;
+
+});
+
+gallery.innerHTML = html;
+
+});
+
+// fungsi admin
+window.tambahTesti = async function(gambar){
+await addDoc(collection(db,"testimoni"),{
+gambar:gambar
+});
+}
+
+</script>
+
+</body>
+</html>
